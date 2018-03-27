@@ -4,10 +4,16 @@ import android.annotation.SuppressLint
 import android.os.Handler
 import android.view.*
 import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 
 @SuppressLint("InflateParams")
-class MultipleButtonPopup(private val view: View, private val parentView: View) {
+class MultipleButtonPopup(
+        private val view: View,
+        private val parentView: View,
+        private val input: List<Double>,
+        private val onClick: (Double) -> Unit) {
 
     companion object {
         const val DELAY_BEFORE_WIGGLE = 200L
@@ -31,6 +37,7 @@ class MultipleButtonPopup(private val view: View, private val parentView: View) 
             if (event.action == MotionEvent.ACTION_UP) {
                 handler.removeCallbacksAndMessages(null)
                 if (popup != null) {
+                    handleClick(event.x, event.y)
                     popup?.dismiss()
                     popup = null
                 }
@@ -38,7 +45,13 @@ class MultipleButtonPopup(private val view: View, private val parentView: View) 
             false
         }
         view.setOnLongClickListener {
-            val layout = layoutInflater.inflate(R.layout.popup_multiple_btn, null)
+            val layout = layoutInflater.inflate(R.layout.popup_multiple_button, null)
+            val multipleBtnGroup = layout.findViewById<LinearLayout>(R.id.multipleBtnGroup)
+            input.forEach {
+                val btn = layoutInflater.inflate(R.layout.view_multiple_popup_button, multipleBtnGroup, false) as Button
+                btn.text = "$it"
+                multipleBtnGroup.addView(btn)
+            }
             popup = PopupWindow(layout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             popup?.animationStyle = R.style.PopupOneBetClickAnim
             popup?.showAtLocation(
@@ -48,5 +61,8 @@ class MultipleButtonPopup(private val view: View, private val parentView: View) 
                     view.y.toInt() + 25)
             true
         }
+    }
+
+    private fun handleClick(x: Float, y: Float) {
     }
 }
