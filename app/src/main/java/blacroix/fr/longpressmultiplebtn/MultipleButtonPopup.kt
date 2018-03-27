@@ -28,39 +28,53 @@ class MultipleButtonPopup(
     private val layoutInflater by lazy {
         LayoutInflater.from(view.context)
     }
+    private val popupLayout by lazy {
+        layoutInflater.inflate(R.layout.popup_multiple_button, null)
+    }
 
     init {
         view.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                handler.postDelayed(wiggle, DELAY_BEFORE_WIGGLE)
-            }
-            if (event.action == MotionEvent.ACTION_UP) {
-                handler.removeCallbacksAndMessages(null)
-                if (popup != null) {
-                    handleClick(event.rawX, event.rawY)
-                    popup?.dismiss()
-                    popup = null
-                }
-            }
+            wiggle(event)
+            onTouchUp(event)
             false
         }
         view.setOnLongClickListener {
-            val layout = layoutInflater.inflate(R.layout.popup_multiple_button, null)
-            val multipleBtnGroup = layout.findViewById<LinearLayout>(R.id.multipleBtnGroup)
-            input.forEach {
-                val btn = layoutInflater.inflate(R.layout.view_multiple_popup_button, multipleBtnGroup, false) as Button
-                btn.text = "$it"
-                multipleBtnGroup.addView(btn)
-            }
-            popup = PopupWindow(layout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            popup?.animationStyle = R.style.PopupOneBetClickAnim
-            popup?.showAtLocation(
-                    parentView,
-                    Gravity.TOP or Gravity.START,
-                    view.x.toInt() - view.width,
-                    view.y.toInt() + 25)
+            showPopupWindow()
             true
         }
+    }
+
+    private fun onTouchUp(event: MotionEvent) {
+        if (event.action == MotionEvent.ACTION_UP) {
+            handler.removeCallbacksAndMessages(null)
+            if (popup != null) {
+                handleClick(event.rawX, event.rawY)
+                popup?.dismiss()
+                popup = null
+            }
+        }
+    }
+
+    private fun wiggle(event: MotionEvent) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            handler.postDelayed(wiggle, DELAY_BEFORE_WIGGLE)
+        }
+    }
+
+    private fun showPopupWindow() {
+        val multipleBtnGroup = popupLayout.findViewById<LinearLayout>(R.id.multipleBtnGroup)
+        input.forEach {
+            val btn = layoutInflater.inflate(R.layout.view_multiple_popup_button, multipleBtnGroup, false) as Button
+            btn.text = "$it"
+            multipleBtnGroup.addView(btn)
+        }
+        popup = PopupWindow(popupLayout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        popup?.animationStyle = R.style.PopupOneBetClickAnim
+        popup?.showAtLocation(
+                parentView,
+                Gravity.TOP or Gravity.START,
+                view.x.toInt() - view.width,
+                view.y.toInt() + 25)
     }
 
     private fun handleClick(x: Float, y: Float) {
