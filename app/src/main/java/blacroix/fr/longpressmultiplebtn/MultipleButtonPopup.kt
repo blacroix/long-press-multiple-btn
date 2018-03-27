@@ -37,7 +37,7 @@ class MultipleButtonPopup(
             if (event.action == MotionEvent.ACTION_UP) {
                 handler.removeCallbacksAndMessages(null)
                 if (popup != null) {
-                    handleClick(event.x, event.y)
+                    handleClick(event.rawX, event.rawY)
                     popup?.dismiss()
                     popup = null
                 }
@@ -64,5 +64,17 @@ class MultipleButtonPopup(
     }
 
     private fun handleClick(x: Float, y: Float) {
+        popup?.run {
+            val group = contentView.findViewById<LinearLayout>(R.id.multipleBtnGroup)
+            val position: Int? = (0 until group.childCount).find {
+                val button = group.getChildAt(it)
+                val location = IntArray(2)
+                button.getLocationOnScreen(location)
+                x >= location[0] && x <= location[0] + button.width && y >= location[1] && y <= location[1] + button.height
+            }
+            position?.run {
+                onClick.invoke((group.getChildAt(position) as Button).text.toString().toDouble())
+            }
+        }
     }
 }
