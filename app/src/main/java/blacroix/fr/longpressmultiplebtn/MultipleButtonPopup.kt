@@ -42,6 +42,16 @@ class MultipleButtonPopup(
             showPopupWindow()
             true
         }
+        initInputLayout()
+    }
+
+    private fun initInputLayout() {
+        val multipleBtnGroup = popupLayout.findViewById<LinearLayout>(R.id.multipleBtnGroup)
+        input.forEach {
+            val btn = layoutInflater.inflate(R.layout.view_multiple_popup_button, multipleBtnGroup, false) as Button
+            btn.text = "$it"
+            multipleBtnGroup.addView(btn)
+        }
     }
 
     private fun onTouchUp(event: MotionEvent) {
@@ -62,12 +72,6 @@ class MultipleButtonPopup(
     }
 
     private fun showPopupWindow() {
-        val multipleBtnGroup = popupLayout.findViewById<LinearLayout>(R.id.multipleBtnGroup)
-        input.forEach {
-            val btn = layoutInflater.inflate(R.layout.view_multiple_popup_button, multipleBtnGroup, false) as Button
-            btn.text = "$it"
-            multipleBtnGroup.addView(btn)
-        }
         popup = PopupWindow(popupLayout, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         popup?.animationStyle = R.style.PopupOneBetClickAnim
         popup?.showAtLocation(
